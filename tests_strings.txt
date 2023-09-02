@@ -5,4 +5,23 @@ abcdef
 e
 my_strlen
 asvcnjqwdd
+my_strcpy
+cxhwrnv
+my_strncpy
+vcjwfdkl
+100
+my_strcat
+xzcqwsd
+my_strncat
+vcxjoqw
+100
+my_fgets
+100
+vcxijfewn
+my_strdup
+cvhiuqf
+my_getline
+cadssq
+my_strlen
+vcxjoweq
 

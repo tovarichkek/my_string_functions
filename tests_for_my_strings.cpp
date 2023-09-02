@@ -16,19 +16,16 @@ void test(FILE* file){
         free(ex_test->request);
         free(ex_test->arg_str1);
         free(ex_test->arg_char);
+        free(ex_test->arg_size_t);
         free(ex_test);
     }
-    /*free(ex_test->request);
-    free(ex_test->arg_str1);
-    free(ex_test->arg_char);*/
-    free(ex_test);
 }
 
 TEST_STRING* input_test(FILE* file){
     my_assert(file != NULL, return NULL);
 
     TEST_STRING* one_test = (TEST_STRING*)calloc(sizeof(TEST_STRING), 1);
-    *one_test = {(char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(1, 1), NULL, NULL};
+    *one_test = {(char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(1, 1), (size_t*)calloc(1, sizeof(size_t)), file};
 
     fgets(one_test->request, size_of_arrays_in_tests, file);
     if(strcmp(one_test->request, "my_puts\n") == 0 || strcmp(one_test->request, "my_strlen\n") == 0 || strcmp(one_test->request, "my_strcpy\n") == 0 || strcmp(one_test->request, "my_strcat\n") == 0 || strcmp(one_test->request, "my_strdup\n") == 0){
@@ -41,19 +38,27 @@ TEST_STRING* input_test(FILE* file){
     }
     else if(strcmp(one_test->request, "my_strchr\n") == 0){
         fgets(one_test->arg_str1, size_of_arrays_in_tests - 1, file);
-        *(one_test->arg_char) = getc(file);
+        *(one_test->arg_char) = (char)getc(file);
         getc(file);
         /*fscanf(file, "%c", one_test->arg_char);
         getc(file);*/
     }
-    else if(strcmp(one_test->request, "fgets\n") == 0){
-        scanf("%zu", one_test->arg_size_t);
+    else if(strcmp(one_test->request, "my_fgets\n") == 0){
+        fscanf(file, "%zu", one_test->arg_size_t);
         getc(file);
     }
-    else if(strcmp(one_test->request, "getline\n") == 0){}   // getline get information themselves
+    else if(strcmp(one_test->request, "my_getline\n") == 0){}   // getline get information themselves
     else{
+        printf("%s", one_test->request);
+
+        free(one_test->request);
+        free(one_test->arg_str1);
+        free(one_test->arg_char);
+        free(one_test->arg_size_t);
+        free(one_test);
         return NULL;
     }
+    printf("%s", one_test->request);
     return one_test;
 }
 
@@ -107,11 +112,8 @@ bool check_results(const TEST_STRING* one_test){
         char str1_to_write[size_of_arrays_in_tests] = "";
         char str2_to_write[size_of_arrays_in_tests] = "";
         my_fgets(str1_to_write, *(one_test->arg_size_t), one_test->arg_file);
-        fseek(one_test->arg_file, -((int)strlen(str1_to_write) + 1), SEEK_CUR);
+        fseek(one_test->arg_file, -(int)strlen(str1_to_write), SEEK_CUR);
         fgets(str2_to_write, (int)*(one_test->arg_size_t), one_test->arg_file);
-        if(strlen(str2_to_write) <= *(one_test->arg_size_t)){
-            while(getc(one_test->arg_file) != '\n'){}
-        }
 
         if(strcmp(str1_to_write, str2_to_write) == 0){
             return true;
@@ -134,7 +136,7 @@ bool check_results(const TEST_STRING* one_test){
         size_t len_of_mass = size_of_arrays_in_tests;
 
         size_t len1 = my_getline(&str1_to_write, &len_of_mass, one_test->arg_file);
-        fseek(one_test->arg_file, -((int)strlen(str1_to_write) + 1), SEEK_CUR);
+        fseek(one_test->arg_file, -((int)strlen(str1_to_write)), SEEK_CUR);
         size_t len2 = (size_t)getline(&str2_to_write, &len_of_mass, one_test->arg_file);
 
         if(len1 == len2 && strcmp(str1_to_write, str2_to_write) == 0){

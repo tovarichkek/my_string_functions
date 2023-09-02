@@ -172,6 +172,7 @@ char* my_strdup(const char* str){
         new_str[index] = str[index];
         index++;
     }while(str[index] != '\0');
+    new_str[index] = '\0';
 
     return new_str;
 }
