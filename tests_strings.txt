@@ -1,0 +1,8 @@
+my_puts
+abcdf
+my_strchr
+abcdef
+e
+my_strlen
+asvcnjqwdd
+

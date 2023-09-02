@@ -4,17 +4,18 @@
 #include "str.h"
 
 
-int my_puts(const char str[]){
+int my_puts(const char* str){
     my_assert(str != NULL, return EOF);
     int index = 0;
     while(str[index] != '\0'){
         putchar(str[index]);
+        index++;
     }
     putchar('\n');
-    return '\n';
+    return 1;
 }
 
-const char* my_strchr(const char str[], const char target_ch){
+const char* my_strchr(const char* str, const char target_ch){
     my_assert(str != NULL, return NULL);
 
     size_t index = 0;
@@ -27,7 +28,7 @@ const char* my_strchr(const char str[], const char target_ch){
     return NULL;
 }
 
-size_t my_strlen(const char str[]){
+size_t my_strlen(const char* str){
     my_assert(str != NULL, return 0);
 
     size_t index = 0;
@@ -38,7 +39,7 @@ size_t my_strlen(const char str[]){
 }
 
 
-char* my_strcpy(char dest[], const char src[]){
+char* my_strcpy(char* dest, const char* src){
     my_assert(src != dest, return NULL);
     my_assert(src != NULL, return NULL);
     my_assert(dest != NULL, return NULL);
@@ -55,7 +56,7 @@ char* my_strcpy(char dest[], const char src[]){
     return dest;
 }
 
-char* my_strncpy(char dest[], const char src[], size_t count_symbols){
+char* my_strncpy(char* dest, const char* src, size_t count_symbols){
     my_assert(src != dest, return NULL);
     my_assert(src != NULL, return NULL);
     my_assert(dest != NULL, return NULL);
@@ -82,7 +83,7 @@ char* my_strncpy(char dest[], const char src[], size_t count_symbols){
     return dest;
 }
 
-char* my_strcat(char dest[], const char src[]){
+char* my_strcat(char* dest, const char* src){
     my_assert(src != dest, return NULL);
     my_assert(src != NULL, return NULL);
     my_assert(dest != NULL, return NULL);
@@ -102,7 +103,7 @@ char* my_strcat(char dest[], const char src[]){
     return dest;
 }
 
-char* my_strncat(char dest[], const char src[], size_t count_symbols){
+char* my_strncat(char* dest, const char* src, size_t count_symbols){
     my_assert(src != dest, return NULL);
     my_assert(src != NULL, return NULL);
     my_assert(dest != NULL, return NULL);
@@ -175,63 +176,66 @@ char* my_strdup(const char* str){
     return new_str;
 }
 
-size_t my_getline(char **lineptr, size_t *len, FILE* file){
-    my_assert(lineptr != NULL, return 0);
-    my_assert(len != NULL, return 0);
-    my_assert(file != NULL, return 0);
+char* buff_input_line(FILE* file){
+    my_assert(file != NULL, return NULL);
 
     char* str = NULL;
-
-    size_t size_of_str = 0;
+    size_t len_of_str = 0;
     int input_char = getc(file);
-    bool flag_continue_input = true; // TODO continue_input
+    bool flag_continue_input = true;
 
     if(input_char == EOF){
+        str = (char*)calloc(1, sizeof(char));
         str[0] = '\0';
         flag_continue_input = false;
     }
     if(input_char == '\n'){
+        len_of_str = 1;
+        str = (char*)calloc(2, sizeof(char));
         str[0] = '\n';
         str[1] = '\0';
         flag_continue_input = false;
     }
 
     while(flag_continue_input){
-        size_of_str += BUFF_GETLINE;
-        str = (char*)realloc(str, size_of_str + 1); // TODO
+        str = (char*)realloc(str, len_of_str + BUFF_GETLINE + 1); // + 1 for \0 if last symbol in buffer is \n
 
         for(size_t i = 0; i < BUFF_GETLINE; i++){
             if(input_char == EOF){
-                str[i + size_of_str - BUFF_GETLINE] = '\0';
+                str[i + len_of_str] = '\0';
                 flag_continue_input = false;
                 break;
             }
             else if(input_char == '\n'){
-                str[i + size_of_str - BUFF_GETLINE] = '\n';
+                str[i + len_of_str] = '\n';
                 flag_continue_input = false;
-                if(i != BUFF_GETLINE - 1){
-                    str[i + size_of_str - BUFF_GETLINE + 1] = '\0';
-                }
+                str[i + len_of_str + 1] = '\0';
                 break;
             }
-            str[i + size_of_str - BUFF_GETLINE] = (char)input_char;
+            str[i + len_of_str] = (char)input_char;
             input_char = getc(file);
         }
+        len_of_str += BUFF_GETLINE;
+    }
+    return str;
+}
+
+size_t my_getline(char **lineptr, size_t *size_of_lineptr, FILE* file){
+    my_assert(lineptr != NULL, return 0);
+    my_assert(size_of_lineptr != NULL, return 0);
+    my_assert(file != NULL, return 0);
+
+    char* str = buff_input_line(file);
+
+    size_t size_of_new_lineptr = strlen(str) + 1;
+    if(*size_of_lineptr < size_of_new_lineptr){
+        *lineptr = (char*)realloc(*lineptr, size_of_new_lineptr);
+        *size_of_lineptr = size_of_new_lineptr;
     }
 
-    size_t size_of_llineptrineptr = 0;
-    while(size_of_lineptr != size_of_str || str[size_of_lineptr] != '\0'){ //todo strlen
-        size_of_lineptr++;
-    }
-    if(*len < size_of_lineptr){
-        *lineptr = (char*)realloc(lineptr, size_of_lineptr + 1);  // + 1 for symbol '\0' //TODO
-        *len = size_of_lineptr + 1;
-    }
-
-    memcpy(*lineptr, str, size_of_lineptr);    //in str can not be '\0', so only size_of_lineptr, without + 1
-    *lineptr[size_of_lineptr] = '\0';
+    memcpy(*lineptr, str, size_of_new_lineptr);
     free(str);
-    return size_of_lineptr;
+    return strlen(*lineptr);
 }
 
 
