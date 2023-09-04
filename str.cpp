@@ -141,15 +141,20 @@ char* my_strncat(char* dest, const char* src, size_t count_symbols){
 char* my_fgets(char* str, size_t count_symbols, FILE* file){
     my_assert(file != NULL, return NULL);
     my_assert(str != NULL, return NULL);
-
+    if(count_symbols == 1){
+        str[0] = '\0';
+        return str;
+    }
     size_t index = 0;
     int input_char = getc(file);
-    while(input_char != EOF && input_char != '\n' && index < count_symbols){
+    while(input_char != EOF && input_char != '\n' && index < count_symbols - 1){
         str[index] = (char)input_char;
         index++;
-        input_char = getc(file);
+        if(index < count_symbols - 1){
+            input_char = getc(file);
+        }
     }
-    if(input_char == '\n' && index < count_symbols){
+    if(input_char == '\n' && index < count_symbols - 1){
         str[index] = '\n';
         index++;
     }

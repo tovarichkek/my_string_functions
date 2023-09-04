@@ -1,6 +1,6 @@
 #pragma once
 
-const int size_of_arrays_in_tests = 200;
+const size_t size_of_arrays_in_tests = 200;
 
 struct TEST_STRING{
     char* request;
@@ -13,3 +13,4 @@ struct TEST_STRING{
 void test(FILE* file);
 TEST_STRING* input_test(FILE* file);
 bool check_results(const TEST_STRING* one_test);
+void destr_TEST_STRING(TEST_STRING* one_test);

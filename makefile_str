@@ -1,0 +1,12 @@
+
+strings.out: strings_main.o tests_for_my_strings.o str.o
+	g++ strings_main.o tests_for_my_strings.o str.o $(cat dedflags.txt) -o strings.out
+
+strings_main.o: strings_main.cpp
+	g++ -c strings_main.cpp $(cat dedflags.txt)
+
+tests_for_my_strings.o: tests_for_my_strings.cpp
+	g++ -c tests_for_my_strings.cpp $(cat dedflags.txt)
+
+str.o: str.cpp
+	g++ -c str.cpp $(cat dedflags.txt)

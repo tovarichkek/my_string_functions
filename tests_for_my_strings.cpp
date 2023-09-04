@@ -13,19 +13,15 @@ void test(FILE* file){
         else{
             printf("ERROR IN TEST №%d\n", i);
         }
-        free(ex_test->request);
-        free(ex_test->arg_str1);
-        free(ex_test->arg_char);
-        free(ex_test->arg_size_t);
-        free(ex_test);
+        destr_TEST_STRING(ex_test);
     }
 }
 
 TEST_STRING* input_test(FILE* file){
     my_assert(file != NULL, return NULL);
 
-    TEST_STRING* one_test = (TEST_STRING*)calloc(sizeof(TEST_STRING), 1);
-    *one_test = {(char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(size_of_arrays_in_tests, 1), (char*)calloc(1, 1), (size_t*)calloc(1, sizeof(size_t)), file};
+    TEST_STRING* one_test = (TEST_STRING*)calloc(1, sizeof(TEST_STRING));
+    *one_test = {(char*)calloc(size_of_arrays_in_tests, sizeof(char)), (char*)calloc(size_of_arrays_in_tests, sizeof(char)), (char*)calloc(1, sizeof(char)), (size_t*)calloc(1, sizeof(size_t)), file};
 
     fgets(one_test->request, size_of_arrays_in_tests, file);
     if(strcmp(one_test->request, "my_puts\n") == 0 || strcmp(one_test->request, "my_strlen\n") == 0 || strcmp(one_test->request, "my_strcpy\n") == 0 || strcmp(one_test->request, "my_strcat\n") == 0 || strcmp(one_test->request, "my_strdup\n") == 0){
@@ -40,8 +36,6 @@ TEST_STRING* input_test(FILE* file){
         fgets(one_test->arg_str1, size_of_arrays_in_tests - 1, file);
         *(one_test->arg_char) = (char)getc(file);
         getc(file);
-        /*fscanf(file, "%c", one_test->arg_char);
-        getc(file);*/
     }
     else if(strcmp(one_test->request, "my_fgets\n") == 0){
         fscanf(file, "%zu", one_test->arg_size_t);
@@ -50,15 +44,9 @@ TEST_STRING* input_test(FILE* file){
     else if(strcmp(one_test->request, "my_getline\n") == 0){}   // getline get information themselves
     else{
         printf("%s", one_test->request);
-
-        free(one_test->request);
-        free(one_test->arg_str1);
-        free(one_test->arg_char);
-        free(one_test->arg_size_t);
-        free(one_test);
+        destr_TEST_STRING(one_test);
         return NULL;
     }
-    printf("%s", one_test->request);
     return one_test;
 }
 
@@ -90,7 +78,7 @@ bool check_results(const TEST_STRING* one_test){
         }
     }
     else if(strcmp(one_test->request, "my_strchr\n") == 0){
-        if(strcmp(my_strchr(one_test->arg_str1, *(one_test->arg_char)) ,strchr(one_test->arg_str1, *(one_test->arg_char))) == 0){
+        if((my_strchr(one_test->arg_str1, *(one_test->arg_char)) == NULL && strchr(one_test->arg_str1, *(one_test->arg_char)) == NULL) || (strcmp(my_strchr(one_test->arg_str1, *(one_test->arg_char)), strchr(one_test->arg_str1, *(one_test->arg_char))) == 0)){
             return true;
         }
     }
@@ -114,7 +102,12 @@ bool check_results(const TEST_STRING* one_test){
         my_fgets(str1_to_write, *(one_test->arg_size_t), one_test->arg_file);
         fseek(one_test->arg_file, -(int)strlen(str1_to_write), SEEK_CUR);
         fgets(str2_to_write, (int)*(one_test->arg_size_t), one_test->arg_file);
-
+        if(*(one_test->arg_size_t) == 1){
+            while(getc(one_test->arg_file) != '\n'){}
+        }
+        if(*(one_test->arg_size_t) > 1 && str2_to_write[strlen(str2_to_write) - 1] != '\n'){
+            while(getc(one_test->arg_file) != '\n'){}
+        }
         if(strcmp(str1_to_write, str2_to_write) == 0){
             return true;
         }
@@ -131,8 +124,8 @@ bool check_results(const TEST_STRING* one_test){
         free(str2);
     }
     else if(strcmp(one_test->request, "my_getline\n") == 0){
-        char* str1_to_write = (char*)calloc(size_of_arrays_in_tests, 1);
-        char* str2_to_write = (char*)calloc(size_of_arrays_in_tests, 1);
+        char* str1_to_write = (char*)calloc(size_of_arrays_in_tests, sizeof(char));
+        char* str2_to_write = (char*)calloc(size_of_arrays_in_tests, sizeof(char));
         size_t len_of_mass = size_of_arrays_in_tests;
 
         size_t len1 = my_getline(&str1_to_write, &len_of_mass, one_test->arg_file);
@@ -150,4 +143,18 @@ bool check_results(const TEST_STRING* one_test){
 
 
     return false;
+}
+
+void destr_TEST_STRING(TEST_STRING* one_test){
+    my_assert(one_test->request != NULL, printf("request is null"); return);
+    my_assert(one_test->arg_str1 != NULL, printf("arg1 is null"); return);
+    my_assert(one_test->arg_char != NULL, printf("arg_char is null"); return);
+    my_assert(one_test->arg_size_t != NULL, printf("arg_size_t is null"); return);
+    my_assert(one_test->request != NULL, printf("one_test is null"); return);
+
+    free(one_test->request);
+    free(one_test->arg_str1);
+    free(one_test->arg_char);
+    free(one_test->arg_size_t);
+    free(one_test);
 }
