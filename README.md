@@ -7,7 +7,7 @@ Write next lines in your command line to execute this programm:
 make -f makefile_str strings.out
 
 ./strings.out
-#Test of my string functions
+# Test of my string functions
 
 Tests are in tests_strings.txt, it has format:
 
